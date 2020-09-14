@@ -19,7 +19,7 @@ var PLAID_PRODUCTS = process.env.PLAID_PRODUCTS.split(',');
 
 // PLAID_PRODUCTS is a comma-separated list of countries for which users
 // will be able to select institutions from.
-var PLAID_COUNTRY_CODES = process.env.PLAID_COUNTY_CODES.split(',');
+var PLAID_COUNTRY_CODES = 'US'.split(',');
 
 // Parameters used for the OAuth redirect Link flow.
 //
