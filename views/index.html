@@ -43,13 +43,16 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
     function render_page($, page_info) {
+      console.log("rendering page");
       var handler = null;
       $.post('/api/create_link_token', {}, function(data){
+        console.log("creating link token");
         if (data.error != null) {
             $('.loading-indicator').hide();
             displayError($('#container'), data.error);
             return;
         }
+        console.log("link token: ", data.link_token);
         localStorage.setItem('link_token', data.link_token);
         handler = Plaid.create({
           token: data.link_token,
@@ -72,9 +75,14 @@
     }
     
     $('#link-btn').on('click', function(e) {
+      console.log('link-btn called');
       if (handler != null) {
         handler.open();
       }
+    });
+    
+    $.post('/api/info', {}, function(result) {
+    render_page(jQuery, result);
     });
     
     </script>
