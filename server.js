@@ -197,6 +197,10 @@ app.post('/api/set_access_token', function(request, response, next) {
     console.log("access token: ", ACCESS_TOKEN);
     console.log("item id: ", ITEM_ID);
     
+    // todo: store the access token and the item id for the user
+    // could store the access token and the item id
+    
+    
     response.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
