@@ -232,7 +232,7 @@ app.get("/api/accounts", function(request, response, next) {
 
   for (let i = 0; i < access_tokens.length; i++) {
     let access_token = access_tokens[i];
-    
+    console.log("access_token: ", access_token);
     client.getAccounts(access_token, function(error, accountsResponse) {
       if (error != null) {
         prettyPrintResponse(error);
@@ -241,10 +241,14 @@ app.get("/api/accounts", function(request, response, next) {
         });
       }
 
+      console.log("accountsResponse: ", accountsResponse);
       // prettyPrintResponse(accountsResponse);
       accountsResponses.push(accountsResponse);
     });
   }
+  
+  console.log("accountsResponses: ", accountsResponses);
+  
   response.json(accountsResponses);
 });
 
