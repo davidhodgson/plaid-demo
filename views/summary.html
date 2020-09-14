@@ -20,12 +20,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script>
     let accounts = JSON.parse(localStorage.getItem("accounts"));
-    console.log(accounts);
+    let access_tokens = [];
+    for (let i = 0; i < accounts.length; i++) {
+      let account = accounts[i];
+      access_tokens.push(account.access_token);
+    }
+    
+    
     $.get({
       url: "/api/accounts",
-      data: {
-        accounts
-      },
+      data: JSON.stringify({access_tokens}),
       success: function(data) {
         $("#get-accounts-data").slideUp(function() {
           console.log("error: ", data.error);
