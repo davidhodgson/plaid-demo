@@ -39,52 +39,57 @@
         </div>
       </div>
     </main>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
-  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-  <script>
-    function render_page($, page_info) {
-      console.log("rendering page");
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <script>
+      var handler;
+      function render_page($, page_info) {
+        handler = null;
+        console.log("rendering page");
 
-      $.post('/api/create_link_token', {}, function(data){
-        console.log("creating link token");
-        if (data.error != null) {
-            $('.loading-indicator').hide();
-            displayError($('#container'), data.error);
+        $.post("/api/create_link_token", {}, function(data) {
+          console.log("creating link token");
+          if (data.error != null) {
+            $(".loading-indicator").hide();
+            displayError($("#container"), data.error);
             return;
-        }
-        console.log("link token: ", data.link_token);
-        localStorage.setItem('link_token', data.link_token);
-        handler = Plaid.create({
-          token: data.link_token,
-          onSuccess: function(public_token) {
-            $.post('/api/set_access_token', {
-              public_token: public_token
-            }, function(data) {
-              $('#container').fadeOut('fast', function() {
-                $('#item_id').text(data.item_id);
-                $('#access_token').text(data.access_token);
-                $('#intro').hide();
-                $('#app, #steps').fadeIn('slow');
-              });
-            });
-          },
+          }
+          console.log("link token: ", data.link_token);
+          localStorage.setItem("link_token", data.link_token);
+          handler = Plaid.create({
+            token: data.link_token,
+            onSuccess: function(public_token) {
+              $.post(
+                "/api/set_access_token",
+                {
+                  public_token: public_token
+                },
+                function(data) {
+                  $("#container").fadeOut("fast", function() {
+                    $("#item_id").text(data.item_id);
+                    $("#access_token").text(data.access_token);
+                    $("#intro").hide();
+                    $("#app, #steps").fadeIn("slow");
+                  });
+                }
+              );
+            }
+          });
+          $("#link-btn").attr("disabled", false);
+          $(".loading-indicator").hide();
         });
-        $('#link-btn').attr('disabled', false);
-        $('.loading-indicator').hide();
-      });
-    }
-    
-    $('#link-btn').on('click', function(e) {
-      console.log('link-btn called');
-      if (handler != null) {
-        handler.open();
       }
-    });
-    
-    $.post('/api/info', {}, function(result) {
-    render_page(jQuery, result);
-    });
-    
+
+      $("#link-btn").on("click", function(e) {
+        console.log("link-btn called");
+        if (handler != null) {
+          handler.open();
+        }
+      });
+
+      $.post("/api/info", {}, function(result) {
+        render_page(jQuery, result);
+      });
     </script>
   </body>
 </html>
