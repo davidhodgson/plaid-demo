@@ -65,7 +65,11 @@
                   public_token: public_token
                 },
                 function(data) {
-                  console.log("data: ", data);
+                  let accounts = localStorage.getItem('accounts');
+                  accoun
+                  localStorage.setItem("access_token", data.access_token);
+                  localStorage.setItem("item_id", data.item_id);
+                  
                   $("#container").fadeOut("fast", function() {
                     $("#item_id").text(data.item_id);
                     $("#access_token").text(data.access_token);
