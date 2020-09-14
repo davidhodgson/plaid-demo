@@ -179,6 +179,7 @@ app.post('/api/create_link_token_for_payment', function(request, response, next)
 // an API access_token
 // https://plaid.com/docs/#exchange-token-flow
 app.post('/api/set_access_token', function(request, response, next) {
+  console.log("setting access token: ", request.body.public_token);
   PUBLIC_TOKEN = request.body.public_token;
   client.exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
     if (error != null) {

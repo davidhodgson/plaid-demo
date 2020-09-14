@@ -31,15 +31,52 @@
               and exchanged for access_token.
             </p>
 
-            <button id="link-btn" class="button button--is-primary" disabled>
+            <button id="link-btn" class="button button--is-primary">
               Add account
             </button>
-            <!--
             <div class="loading-indicator"></div>
-            -->
           </div>
         </div>
       </div>
     </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <script>
+    function render_page($, page_info) {
+      var handler = null;
+      $.post('/api/create_link_token', {}, function(data){
+        if (data.error != null) {
+            $('.loading-indicator').hide();
+            displayError($('#container'), data.error);
+            return;
+        }
+        localStorage.setItem('link_token', data.link_token);
+        handler = Plaid.create({
+          token: data.link_token,
+          onSuccess: function(public_token) {
+            $.post('/api/set_access_token', {
+              public_token: public_token
+            }, function(data) {
+              $('#container').fadeOut('fast', function() {
+                $('#item_id').text(data.item_id);
+                $('#access_token').text(data.access_token);
+                $('#intro').hide();
+                $('#app, #steps').fadeIn('slow');
+              });
+            });
+          },
+        });
+        $('#link-btn').attr('disabled', false);
+        $('.loading-indicator').hide();
+      });
+    }
+    
+    $('#link-btn').on('click', function(e) {
+      if (handler != null) {
+        handler.open();
+      }
+    });
+    
+    </script>
   </body>
 </html>
