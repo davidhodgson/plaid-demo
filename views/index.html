@@ -44,7 +44,7 @@
   <script>
     function render_page($, page_info) {
       console.log("rendering page");
-      var handler = null;
+
       $.post('/api/create_link_token', {}, function(data){
         console.log("creating link token");
         if (data.error != null) {
