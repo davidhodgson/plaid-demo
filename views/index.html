@@ -65,10 +65,13 @@
                   public_token: public_token
                 },
                 function(data) {
-                  let accounts = localStorage.getItem('accounts');
-                  accoun
-                  localStorage.setItem("access_token", data.access_token);
-                  localStorage.setItem("item_id", data.item_id);
+                  let accounts = localStorage.getItem('accounts') || [];
+                  let newItem = new Map();
+                  newItem.set("access_token", data.access_token);
+                  newItem.set("item_id", data.item_id);
+                  accounts.push(newItem);
+                  
+                  localStorage.setItem("accounts", JSON.stringify(accounts));
                   
                   $("#container").fadeOut("fast", function() {
                     $("#item_id").text(data.item_id);
