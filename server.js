@@ -62,6 +62,10 @@ app.get('/', function(request, response, next) {
   response.sendFile('./views/index.html', { root: __dirname });
 });
 
+app.get('/summary', function(request, response, next) {
+  response.sendFile('./views/summary.html', { root: __dirname });
+});
+
 // This is an endpoint defined for the OAuth flow to redirect to.
 app.get('/oauth-response.html', function(request, response, next) {
   response.sendFile('./views/oauth-response.html', { root: __dirname });
