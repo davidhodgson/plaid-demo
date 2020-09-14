@@ -11,37 +11,49 @@
   <body>
     <main class="main">
       <div class="item-data-row__response">
-          <table><tbody id="get-accounts-data"></tbody></table>
+        <table>
+          <tbody id="get-accounts-data"></tbody>
+        </table>
       </div>
     </main>
   </body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script>
-    let accounts = localStorage.getItem('accounts');
+    let accounts = JSON.parse(localStorage.getItem("accounts"));
     console.log(accounts);
-    $.get('/api/accounts', 
-          data: {
-            accounts
-          }
-          function(data) {
-
-        $('#get-accounts-data').slideUp(function() {
+    $.get({
+      url: "/api/accounts",
+      data: {
+        accounts
+      },
+      success: function(data) {
+        $("#get-accounts-data").slideUp(function() {
+          console.log("error: ", data.error);
           if (data.error != null) {
             displayError(this, data.error);
             return;
           }
-          var html = '<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
+          var html =
+            "<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>";
           data.accounts.forEach(function(account, idx) {
-            html += '<tr>';
-            html += '<td>' + account.name + '</td>';
-            html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>';
-            html += '<td>' + account.subtype + '</td>';
-            html += '<td>' + account.mask + '</td>';
-            html += '</tr>';
+            html += "<tr>";
+            html += "<td>" + account.name + "</td>";
+            html +=
+              "<td>$" +
+              (account.balances.available != null
+                ? account.balances.available
+                : account.balances.current) +
+              "</td>";
+            html += "<td>" + account.subtype + "</td>";
+            html += "<td>" + account.mask + "</td>";
+            html += "</tr>";
           });
 
-          $(this).html(html).slideDown();
+          $(this)
+            .html(html)
+            .slideDown();
         });
-      });    
+      }
+    });
   </script>
 </html>

@@ -216,6 +216,9 @@ app.post('/api/set_access_token', function(request, response, next) {
 // Retrieve an Item's accounts
 // https://plaid.com/docs/#accounts
 app.get('/api/accounts', function(request, response, next) {
+  
+  console.log("data: ", request.data);
+  
   client.getAccounts(ACCESS_TOKEN, function(error, accountsResponse) {
     if (error != null) {
       prettyPrintResponse(error);
