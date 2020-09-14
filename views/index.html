@@ -66,9 +66,9 @@
                 },
                 function(data) {
                   let accounts = localStorage.getItem('accounts') || [];
-                  let newItem = new Map();
-                  newItem.set("access_token", data.access_token);
-                  newItem.set("item_id", data.item_id);
+                  let newItem = {};
+                  newItem["access_token"] = data.access_token;
+                  newItem["item_id"] = data.item_id;
                   accounts.push(newItem);
                   
                   localStorage.setItem("accounts", JSON.stringify(accounts));
