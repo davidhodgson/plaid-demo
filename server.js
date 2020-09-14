@@ -217,7 +217,10 @@ app.post('/api/set_access_token', function(request, response, next) {
 // https://plaid.com/docs/#accounts
 app.get('/api/accounts', function(request, response, next) {
   
-  console.log("data: ", request.data);
+  let accessTokens = JSON.parse(request.query.data);
+  console.log("accessTokens: ", accessTokens);
+  let access_tokens = accessTokens.accessTokens;
+  console.log("access_tokens: ", access_tokens);
   
   client.getAccounts(ACCESS_TOKEN, function(error, accountsResponse) {
     if (error != null) {

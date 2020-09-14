@@ -29,7 +29,7 @@
     
     $.get({
       url: "/api/accounts",
-      data: JSON.stringify({access_tokens}),
+      data: {data : JSON.stringify({access_tokens}) },
       success: function(data) {
         $("#get-accounts-data").slideUp(function() {
           console.log("error: ", data.error);
