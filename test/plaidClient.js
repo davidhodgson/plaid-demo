@@ -44,6 +44,10 @@ describe("PlaidClient", function() {
   });
   
   it("should get recent transaction data, given an access token", function() {
+    const plaidClient = new PlaidClient();
+    sinon.stub(plaidClient, "getTransactions").returns("transactions_list");
+    let transactions_list = plaidClient.getTransactions("access_token");
+    expect(transactions_list).to.eql("transactions_list");
     
   });
   
