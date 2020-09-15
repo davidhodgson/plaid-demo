@@ -232,7 +232,6 @@ app.get("/api/accounts", async function(request, response, next) {
 
   for (let i = 0; i < access_tokens.length; i++) {
     let access_token = access_tokens[i];
-    console.log("access_token: ", access_token);
     let accountsResponse = await getAccount(access_token);
     console.log("accountsResponse: ", accountsResponse);
       // prettyPrintResponse(accountsResponse);
@@ -245,12 +244,8 @@ app.get("/api/accounts", async function(request, response, next) {
 });
 
 async function getAccount(access_token) {
-  client.getAccount(access_token, function(error, accountsResponse) {
-    if (error != null) {
-        // handle error
-      }
-    return accountsResponse;
-  });
+  let accountsResponse = await client.getAccounts(access_token);
+  return accountsResponse;
 }
 
 // Retrieve an Item's accounts
