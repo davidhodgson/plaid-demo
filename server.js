@@ -259,40 +259,45 @@ async function getInstitution(access_token) {
   return institution;
 }
 
-app.get("/api/transactions", function(request, response, next) {
-  
-  let accessTokens = JSON.parse(request.query.data);
-  console.log("accessTokens: ", accessTokens);
-  let access_tokens = accessTokens.access_tokens;
-  console.log("access_tokens: ", access_tokens);
-  let accountsResponses = [];
-  
-  
-  // Pull transactions for the Item for the last 30 days
+async function getTransactions(access_token) {
   var startDate = moment()
     .subtract(30, "days")
     .format("YYYY-MM-DD");
   var endDate = moment().format("YYYY-MM-DD");
-  client.getTransactions(
-    ACCESS_TOKEN,
-    startDate,
-    endDate,
-    {
-      count: 250,
-      offset: 0
-    },
-    function(error, transactionsResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        return response.json({
-          error: error
-        });
-      } else {
-        prettyPrintResponse(transactionsResponse);
-        response.json(transactionsResponse);
-      }
-    }
-  );
+  
+  let transactions;
+  
+  try {
+    transactions = await client.getTransactions(
+      access_token,
+      startDate,
+      endDate,
+      {
+        count: 250,
+        offset: 0
+      },
+    ); 
+  } catch (e) {
+    console.log(e);
+  }
+  
+  return transactions;
+}
+
+app.get("/api/transactions", async function(request, response, next) {
+  
+  let accessTokens = JSON.parse(request.query.data);
+  let access_tokens = accessTokens.access_tokens;
+  let transactionsList = [];
+  
+  for (let i = 0; i < access_tokens.length; i++) {
+    let access_token = access_tokens[i];
+    let transactions = await getTransactions(access_token);
+    transactionsList.push(transactions);
+  }
+  
+  response.json(transactionsList);
+  
 });
 
 

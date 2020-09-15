@@ -23,10 +23,10 @@
     let access_tokens = JSON.parse(localStorage.getItem("access_tokens"));
 
     $.get({
-      url: "/api/accounts",
+      url: "/api/transactions",
       data: { data: JSON.stringify({ access_tokens }) },
       success: function(data) {
-        console.log("accounts data: ", data);
+        console.log("transactions data: ", data);
 
         $("#get-transactions-data").slideUp(function() {
           console.log("error: ", data.error);
