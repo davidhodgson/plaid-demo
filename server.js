@@ -10,9 +10,6 @@ const PlaidClient = require("./plaidClient");
 
 var APP_PORT = envvar.number("APP_PORT", 8000);
 
-var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
-var PLAID_SECRET = process.env.PLAID_SECRET;
-var PLAID_ENV = process.env.PLAID_ENV;
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
@@ -108,7 +105,7 @@ app.post("/api/create_link_token", async function(request, response, next) {
   }
 });
 
-// Exchange token flow
+// Exchange public token for an access token
 app.post("/api/set_access_token", async function(request, response, next) {
   let resp;
   try {
@@ -133,31 +130,35 @@ app.post("/api/set_access_token", async function(request, response, next) {
   }
 });
 
-// Return an account for an item
+// Returns a list of accounts, given a list of access_tokens
 app.get("/api/accounts", async function(request, response, next) {
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
 
-  let accountsResponses = [];
+  let accountsList = [];
 
   try {
-  for (let i = 0; i < access_tokens.length; i++) {
-    let access_token = access_tokens[i];
-    let accounts = await client.getAccounts(access_token);
-    let institution = await client.getInstitution(access_token);
-    let accountsData = { accounts, institution: institution.institution.name };
-    accountsResponses.push(accountsData);
-  }
+    for (let i = 0; i < access_tokens.length; i++) {
+      let access_token = access_tokens[i];
+      let accounts = await client.getAccounts(access_token);
+      let institution = await client.getInstitution(access_token);
+      let accountsData = {
+        accounts,
+        institution: institution.institution.name
+      };
+      accountsList.push(accountsData);
+    }
   } catch (error) {
     console.log(error);
-    response.json({error})
+    response.json({ error });
   }
 
-  console.log("accountsResponses: ", accountsResponses);
+  console.log("accountsList: ", accountsList);
 
-  response.json(accountsResponses);
+  response.json(accountsList);
 });
 
+// Returns a list of transactions, given a list of access_tokens
 app.get("/api/transactions", async function(request, response, next) {
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
@@ -171,7 +172,7 @@ app.get("/api/transactions", async function(request, response, next) {
     }
   } catch (error) {
     console.log(error);
-    response.json({error});
+    response.json({ error });
   }
 
   response.json(transactionsList);

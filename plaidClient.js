@@ -55,8 +55,9 @@ class PlaidClient {
         offset: 0
       }
     );
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    console.log(error);
+    throw(error);
   }
 
   return transactions;
