@@ -25,15 +25,13 @@
       let account = accounts[i];
       access_tokens.push(account.access_token);
     }
-    
-    
+
     $.get({
       url: "/api/accounts",
-      data: {data : JSON.stringify({access_tokens}) },
+      data: { data: JSON.stringify({ access_tokens }) },
       success: function(data) {
-        
         console.log("accounts data: ", data);
-        
+
         $("#get-accounts-data").slideUp(function() {
           console.log("error: ", data.error);
           if (data.error != null) {
@@ -41,12 +39,18 @@
             return;
           }
           var html =
-            "<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>";
-          
+            `<tr>
+                <td><strong>Institution</strong></td>
+                <td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>`;
+
           for (let i = 0; i < data.length; i++) {
-          
-            data[i].accounts.forEach(function(account, idx) {
+            console.log("data[i]", data[i]);
+            console.log("data[i].institution", data[i].institution);
+            let institution = data[i].institution;
+
+            data[i].accounts.accounts.forEach(function(account, idx) {
               html += "<tr>";
+              html += "<td>" + institution + "</td>";
               html += "<td>" + account.name + "</td>";
               html +=
                 "<td>$" +
