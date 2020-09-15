@@ -61,7 +61,7 @@ app.use(
 app.use(bodyParser.json());
 
 app.get("/", function(request, response, next) {
-  response.sendFile("./views/index.html", { root: __dirname });
+  response.sendFile("./views/addAccount.html", { root: __dirname });
 });
 
 app.get("/summary", function(request, response, next) {

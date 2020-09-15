@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add Account</title>
+    <link rel="stylesheet" href="https://threads.plaid.com/threads.css" />
+
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <main class="main">
+      <div class="grid">
+        <div class="grid__column grid__column--is-twelve-columns">
+          <div id="banner" class="everpresent-content">
+            <h1 class="everpresent-content__heading">Add account</h1>
+            <p id="intro" class="everpresent-content__subheading">
+              An example application that outlines an end-to-end integration
+              with Plaid
+            </p>
+            <p id="steps" class="everpresent-content__subheading">
+              Success! You just created an Item by linking your account.
+            </p>
+          </div>
+
+          <div id="container" class="initial-view">
+            <p class="initial-view__description">
+              Click the button below to add an account. The username is user_good, and the password is pass_good for all accounts.
+            </p>
+
+            <button id="link-btn" class="button button--is-primary">
+              Add account
+            </button>
+            <div class="loading-indicator"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <script>
+      var handler;
+      function render_page($, page_info) {
+        handler = null;
+        console.log("rendering page");
+
+        $.post("/api/create_link_token", {}, function(data) {
+          console.log("creating link token");
+          if (data.error != null) {
+            $(".loading-indicator").hide();
+            displayError($("#container"), data.error);
+            return;
+          }
+          console.log("link token: ", data.link_token);
+          localStorage.setItem("link_token", data.link_token);
+          handler = Plaid.create({
+            token: data.link_token,
+            onSuccess: function(public_token) {
+              $.post(
+                "/api/set_access_token",
+                {
+                  public_token: public_token
+                },
+                function(data) {
+                  let access_tokens;
+                  
+                  if (localStorage.getItem('access_tokens')) {
+                    access_tokens = JSON.parse(localStorage.getItem('access_tokens'));
+                  } else {
+                    access_tokens = [];
+                  }
+                  
+                  access_tokens.push(data.access_token);
+                  localStorage.setItem("access_tokens", JSON.stringify(access_tokens));
+                  
+                  $("#container").fadeOut("fast", function() {
+                    $("#item_id").text(data.item_id);
+                    $("#access_token").text(data.access_token);
+                    $("#intro").hide();
+                    $("#app, #steps").fadeIn("slow");
+                  });
+                }
+              );
+            }
+          });
+          $("#link-btn").attr("disabled", false);
+          $(".loading-indicator").hide();
+        });
+      }
+
+      $("#link-btn").on("click", function(e) {
+        console.log("link-btn called");
+        if (handler != null) {
+          handler.open();
+        }
+      });
+
+      $.post("/api/info", {}, function(result) {
+        render_page(jQuery, result);
+      });
+    </script>
+  </body>
+</html>
