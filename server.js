@@ -222,7 +222,7 @@ app.post("/api/set_access_token", function(request, response, next) {
 
 // Retrieve an Item's accounts
 // https://plaid.com/docs/#accounts
-app.get("/api/accounts", function(request, response, next) {
+app.get("/api/accounts", async function(request, response, next) {
   let accessTokens = JSON.parse(request.query.data);
   console.log("accessTokens: ", accessTokens);
   let access_tokens = accessTokens.access_tokens;
@@ -233,24 +233,25 @@ app.get("/api/accounts", function(request, response, next) {
   for (let i = 0; i < access_tokens.length; i++) {
     let access_token = access_tokens[i];
     console.log("access_token: ", access_token);
-    client.getAccounts(access_token, function(error, accountsResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        return response.json({
-          error: error
-        });
-      }
-
-      console.log("accountsResponse: ", accountsResponse);
+    let accountsResponse = await getAccount(access_token);
+    console.log("accountsResponse: ", accountsResponse);
       // prettyPrintResponse(accountsResponse);
-      accountsResponses.push(accountsResponse);
-    });
+    accountsResponses.push(accountsResponse);
   }
   
   console.log("accountsResponses: ", accountsResponses);
   
   response.json(accountsResponses);
 });
+
+async function getAccount(access_token) {
+  client.getAccount(access_token, function(error, accountsResponse) {
+    if (error != null) {
+        // handle error
+      }
+    return accountsResponse;
+  });
+}
 
 // Retrieve an Item's accounts
 // https://plaid.com/docs/#accounts
