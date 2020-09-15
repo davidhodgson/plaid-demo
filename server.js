@@ -107,7 +107,7 @@ app.post("/api/create_link_token", async function(request, response, next) {
 
   let resp;
   try {
-    resp = client.createLinkToken(configs);
+    resp = await client.createLinkToken(configs);
     return response.json(resp);
   } catch (error) {
     console.log(error);
@@ -117,9 +117,7 @@ app.post("/api/create_link_token", async function(request, response, next) {
   }
 });
 
-// Exchange token flow - exchange a Link public_token for
-// an API access_token
-// https://plaid.com/docs/#exchange-token-flow
+// Exchange token flow
 app.post("/api/set_access_token", async function(request, response, next) {
   let resp;
   try {
@@ -154,7 +152,7 @@ app.get("/api/accounts", async function(request, response, next) {
 
   for (let i = 0; i < access_tokens.length; i++) {
     let access_token = access_tokens[i];
-    let accounts = await getAccounts(access_token);
+    let accounts = await client.getAccounts(access_token);
     let institution = await getInstitution(access_token);
     let accountsData = { accounts, institution: institution.institution.name };
     accountsResponses.push(accountsData);

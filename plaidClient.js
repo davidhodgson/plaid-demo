@@ -17,9 +17,24 @@ class PlaidClient {
     });
   }
   
-  createLinkToken() {
-    
+  createLinkToken(configs) {
+    console.log("creating link token");
+    return this.client.createLinkToken(configs);
   }
+  
+  exchangePublicToken(public_token) {
+    return this.client.exchangePublicToken(public_token);
+  }
+  
+  getAccounts(access_token) {
+    return this.client.getAccounts(access_token);
+  }
+  
+  async getInstitution(access_token) {
+    let item = await this.client.getItem(access_token);
+    let institution = await this.client.getInstitutionById(item.item.institution_id);
+    return institution;
+}
 }
 
 module.exports = PlaidClient;
