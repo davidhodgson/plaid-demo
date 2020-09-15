@@ -6,7 +6,7 @@ var envvar = require("envvar");
 var express = require("express");
 var bodyParser = require("body-parser");
 var moment = require("moment");
-var plaid = require("plaid");
+const PlaidClient = require('./plaidClient');
 
 var APP_PORT = envvar.number("APP_PORT", 8000);
 var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -41,6 +41,8 @@ var PAYMENT_ID = null;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
+
+/*
 var client = new plaid.Client({
   clientID: PLAID_CLIENT_ID,
   secret: PLAID_SECRET,
@@ -49,6 +51,9 @@ var client = new plaid.Client({
     version: "2019-05-29"
   }
 });
+*/
+
+const client = new PlaidClient();
 
 var app = express();
 app.use(express.static("public"));
@@ -103,17 +108,13 @@ app.post("/api/create_link_token", async function(request, response, next) {
   let resp;
   try {
     resp = client.createLinkToken(configs);
-  } catch(error) {
-    
+    return response.json(resp);
+  } catch (error) {
+    console.log(error);
+    return response.json({
+      error: error
+    });
   }
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    response.json(createTokenResponse);
-  });
 });
 
 // Exchange token flow - exchange a Link public_token for
