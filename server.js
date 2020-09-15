@@ -233,7 +233,9 @@ app.get("/api/accounts", async function(request, response, next) {
   for (let i = 0; i < access_tokens.length; i++) {
     let access_token = access_tokens[i];
     let accountsResponse = await getAccount(access_token);
+    let institution = await getItem(access_token);
     console.log("accountsResponse: ", accountsResponse);
+    console.log("institution: ", institution);
       // prettyPrintResponse(accountsResponse);
     accountsResponses.push(accountsResponse);
   }
@@ -246,6 +248,20 @@ app.get("/api/accounts", async function(request, response, next) {
 async function getAccount(access_token) {
   let accountsResponse = await client.getAccounts(access_token);
   return accountsResponse;
+}
+
+async function getItem(access_token) {
+  let item = await client.getItem(access_token);
+  let institution = await client.getInstitutionById(item.item.institution_id);
+  console.log("item: ", item);
+  console.log("institution: ", institution);
+  return institution;
+  
+  /*
+  response.json({
+          item: itemResponse.item,
+          institution: instRes.institution
+  }*/
 }
 
 // Retrieve an Item's accounts
