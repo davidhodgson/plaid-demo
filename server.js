@@ -261,7 +261,7 @@ async function getInstitution(access_token) {
 
 async function getTransactions(access_token) {
   var startDate = moment()
-    .subtract(30, "days")
+    .subtract(7, "days")
     .format("YYYY-MM-DD");
   var endDate = moment().format("YYYY-MM-DD");
   
