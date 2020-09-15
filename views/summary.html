@@ -42,19 +42,23 @@
           }
           var html =
             "<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>";
-          data.accounts.forEach(function(account, idx) {
-            html += "<tr>";
-            html += "<td>" + account.name + "</td>";
-            html +=
-              "<td>$" +
-              (account.balances.available != null
-                ? account.balances.available
-                : account.balances.current) +
-              "</td>";
-            html += "<td>" + account.subtype + "</td>";
-            html += "<td>" + account.mask + "</td>";
-            html += "</tr>";
-          });
+          
+          for (let i = 0; i < data.length; i++) {
+          
+            data[i].accounts.forEach(function(account, idx) {
+              html += "<tr>";
+              html += "<td>" + account.name + "</td>";
+              html +=
+                "<td>$" +
+                (account.balances.available != null
+                  ? account.balances.available
+                  : account.balances.current) +
+                "</td>";
+              html += "<td>" + account.subtype + "</td>";
+              html += "<td>" + account.mask + "</td>";
+              html += "</tr>";
+            });
+          }
 
           $(this)
             .html(html)
