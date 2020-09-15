@@ -65,13 +65,16 @@
                   public_token: public_token
                 },
                 function(data) {
-                  let accounts = localStorage.getItem('accounts') || [];
-                  let newItem = {};
-                  newItem["access_token"] = data.access_token;
-                  newItem["item_id"] = data.item_id;
-                  accounts.push(newItem);
+                  let access_tokens;
                   
-                  localStorage.setItem("accounts", JSON.stringify(accounts));
+                  if (localStorage.getItem('access_tokens')) {
+                    access_tokens = JSON.parse(localStorage.getItem('access_tokens'));
+                  } else {
+                    access_tokens = [];
+                  }
+                  
+                  access_tokens.push(data.access_token);
+                  localStorage.setItem("access_tokens", JSON.stringify(access_tokens));
                   
                   $("#container").fadeOut("fast", function() {
                     $("#item_id").text(data.item_id);
