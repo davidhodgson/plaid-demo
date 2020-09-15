@@ -209,9 +209,6 @@ app.post("/api/set_access_token", function(request, response, next) {
     console.log("access token: ", ACCESS_TOKEN);
     console.log("item id: ", ITEM_ID);
 
-    // todo: store the access token and the item id for the user
-    // could store the access token and the item id
-
     response.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
@@ -255,14 +252,7 @@ async function getAccounts(access_token) {
 async function getInstitution(access_token) {
   let item = await client.getItem(access_token);
   let institution = await client.getInstitutionById(item.item.institution_id);
-  console.log("institution name: ", institution.institution.name);
   return institution;
-  
-  /*
-  response.json({
-          item: itemResponse.item,
-          institution: instRes.institution
-  }*/
 }
 
 // Retrieve an Item's accounts
@@ -405,63 +395,6 @@ app.get("/api/investment_transactions", function(request, response, next) {
   });
 });
 
-// Create and then retrieve an Asset Report for one or more Items. Note that an
-// Asset Report can contain up to 100 items, but for simplicity we're only
-// including one Item here.
-// https://plaid.com/docs/#assets
-app.get("/api/assets", function(request, response, next) {
-  // You can specify up to two years of transaction history for an Asset
-  // Report.
-  var daysRequested = 10;
-
-  // The `options` object allows you to specify a webhook for Asset Report
-  // generation, as well as information that you want included in the Asset
-  // Report. All fields are optional.
-  var options = {
-    client_report_id: "Custom Report ID #123",
-    // webhook: 'https://your-domain.tld/plaid-webhook',
-    user: {
-      client_user_id: "Custom User ID #456",
-      first_name: "Alice",
-      middle_name: "Bobcat",
-      last_name: "Cranberry",
-      ssn: "123-45-6789",
-      phone_number: "555-123-4567",
-      email: "alice@example.com"
-    }
-  };
-  client.createAssetReport([ACCESS_TOKEN], daysRequested, options, function(
-    error,
-    assetReportCreateResponse
-  ) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    prettyPrintResponse(assetReportCreateResponse);
-
-    var assetReportToken = assetReportCreateResponse.asset_report_token;
-    respondWithAssetReport(20, assetReportToken, client, response);
-  });
-});
-
-// This functionality is only relevant for the UK Payment Initiation product.
-// Retrieve Payment for a specified Payment ID
-app.get("/api/payment", function(request, response, next) {
-  client.getPayment(PAYMENT_ID, function(error, paymentGetResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    prettyPrintResponse(paymentGetResponse);
-    response.json({ error: null, payment: paymentGetResponse });
-  });
-});
-
 // Retrieve information about an Item
 // https://plaid.com/docs/#retrieve-item
 app.get("/api/item", function(request, response, next) {
@@ -502,65 +435,4 @@ var server = app.listen(APP_PORT, function() {
 
 var prettyPrintResponse = response => {
   console.log(util.inspect(response, { colors: true, depth: 4 }));
-};
-
-// This is a helper function to poll for the completion of an Asset Report and
-// then send it in the response to the client. Alternatively, you can provide a
-// webhook in the `options` object in your `/asset_report/create` request to be
-// notified when the Asset Report is finished being generated.
-var respondWithAssetReport = (
-  numRetriesRemaining,
-  assetReportToken,
-  client,
-  response
-) => {
-  if (numRetriesRemaining == 0) {
-    return response.json({
-      error: "Timed out when polling for Asset Report"
-    });
-  }
-
-  var includeInsights = false;
-  client.getAssetReport(assetReportToken, includeInsights, function(
-    error,
-    assetReportGetResponse
-  ) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      if (error.error_code == "PRODUCT_NOT_READY") {
-        setTimeout(
-          () =>
-            respondWithAssetReport(
-              --numRetriesRemaining,
-              assetReportToken,
-              client,
-              response
-            ),
-          1000
-        );
-        return;
-      }
-
-      return response.json({
-        error: error
-      });
-    }
-
-    client.getAssetReportPdf(assetReportToken, function(
-      error,
-      assetReportGetPdfResponse
-    ) {
-      if (error != null) {
-        return response.json({
-          error: error
-        });
-      }
-
-      response.json({
-        error: null,
-        json: assetReportGetResponse.report,
-        pdf: assetReportGetPdfResponse.buffer.toString("base64")
-      });
-    });
-  });
 };

@@ -20,14 +20,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script>
     let access_tokens = JSON.parse(localStorage.getItem("access_tokens"));
-    
-    /*
-    let access_tokens = [];
-    for (let i = 0; i < accounts.length; i++) {
-      let account = accounts[i];
-      access_tokens.push(account.access_token);
-    }
-    */
 
     $.get({
       url: "/api/accounts",
@@ -45,9 +37,8 @@
             `<tr>
                 <td><strong>Institution</strong></td>
                 <td><strong>Name</strong></td>
-                <td><strong>Balances</strong></td>
-                <td><strong>Subtype</strong></td>
-                <td><strong>Mask</strong></td>
+                <td><strong>Type</strong></td>
+                <td><strong>Balance</strong></td>
             </tr>`;
 
           for (let i = 0; i < data.length; i++) {
@@ -59,14 +50,13 @@
               html += "<tr>";
               html += "<td>" + institution + "</td>";
               html += "<td>" + account.name + "</td>";
+              html += "<td>" + account.subtype + "</td>";
               html +=
                 "<td>$" +
                 (account.balances.available != null
                   ? account.balances.available
                   : account.balances.current) +
                 "</td>";
-              html += "<td>" + account.subtype + "</td>";
-              html += "<td>" + account.mask + "</td>";
               html += "</tr>";
             });
           }
