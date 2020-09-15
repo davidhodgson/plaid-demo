@@ -84,10 +84,7 @@ app.post("/api/info", function(request, response, next) {
   });
 });
 
-// Create a link token with configs which we can then use to initialize Plaid Link client-side.
-// See https://plaid.com/docs/#create-link-token
-app.post("/api/create_link_token", function(request, response, next) {
-  console.log("creating link token");
+app.post("/api/create_link_token", async function(request, response, next) {
   const configs = {
     user: {
       // This should correspond to a unique id for the current user.
@@ -103,7 +100,12 @@ app.post("/api/create_link_token", function(request, response, next) {
     configs.redirect_uri = PLAID_REDIRECT_URI;
   }
 
-  client.createLinkToken(configs, function(error, createTokenResponse) {
+  let resp;
+  try {
+    resp = client.createLinkToken(configs);
+  } catch(error) {
+    
+  }
     if (error != null) {
       prettyPrintResponse(error);
       return response.json({
@@ -118,18 +120,13 @@ app.post("/api/create_link_token", function(request, response, next) {
 // an API access_token
 // https://plaid.com/docs/#exchange-token-flow
 app.post("/api/set_access_token", async function(request, response, next) {
-  console.log("setting access token: ", request.body.public_token);
-  let resp = await client.exchangePublicToken(request.body.public_token, function(error, tokenResponse){
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    ACCESS_TOKEN = tokenResponse.access_token;
-    ITEM_ID = tokenResponse.item_id;
-    prettyPrintResponse(tokenResponse);
+  let resp;
+  try {
+    resp = await client.exchangePublicToken(request.body.public_token);
 
+    ACCESS_TOKEN = resp.access_token;
+    ITEM_ID = resp.item_id;
+    console.log(resp);
     console.log("access token: ", ACCESS_TOKEN);
     console.log("item id: ", ITEM_ID);
 
@@ -138,37 +135,13 @@ app.post("/api/set_access_token", async function(request, response, next) {
       item_id: ITEM_ID,
       error: null
     });
-  });
-});
-
-/*
-// Exchange token flow - exchange a Link public_token for
-// an API access_token
-// https://plaid.com/docs/#exchange-token-flow
-app.post("/api/set_access_token", async function(request, response, next) {
-  console.log("setting access token: ", request.body.public_token);
-  client.exchangePublicToken(request.body.public_token, function(error, tokenResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    ACCESS_TOKEN = tokenResponse.access_token;
-    ITEM_ID = tokenResponse.item_id;
-    prettyPrintResponse(tokenResponse);
-
-    console.log("access token: ", ACCESS_TOKEN);
-    console.log("item id: ", ITEM_ID);
-
-    response.json({
-      access_token: ACCESS_TOKEN,
-      item_id: ITEM_ID,
-      error: null
+  } catch (error) {
+    console.log(error);
+    return response.json({
+      error: error
     });
-  });
+  }
 });
-*/
 
 // Retrieve an Item's accounts
 // https://plaid.com/docs/#accounts
@@ -182,12 +155,12 @@ app.get("/api/accounts", async function(request, response, next) {
     let access_token = access_tokens[i];
     let accounts = await getAccounts(access_token);
     let institution = await getInstitution(access_token);
-    let accountsData = { accounts, institution: institution.institution.name};
+    let accountsData = { accounts, institution: institution.institution.name };
     accountsResponses.push(accountsData);
   }
-  
+
   console.log("accountsResponses: ", accountsResponses);
-  
+
   response.json(accountsResponses);
 });
 
@@ -207,9 +180,9 @@ async function getTransactions(access_token) {
     .subtract(7, "days")
     .format("YYYY-MM-DD");
   var endDate = moment().format("YYYY-MM-DD");
-  
+
   let transactions;
-  
+
   try {
     transactions = await client.getTransactions(
       access_token,
@@ -218,93 +191,27 @@ async function getTransactions(access_token) {
       {
         count: 250,
         offset: 0
-      },
-    ); 
+      }
+    );
   } catch (e) {
     console.log(e);
   }
-  
+
   return transactions;
 }
 
 app.get("/api/transactions", async function(request, response, next) {
-  
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
   let transactionsList = [];
-  
+
   for (let i = 0; i < access_tokens.length; i++) {
     let access_token = access_tokens[i];
     let transactions = await getTransactions(access_token);
     transactionsList.push(transactions);
   }
-  
+
   response.json(transactionsList);
-  
-});
-
-// Retrieve Identity for an Item
-// https://plaid.com/docs/#identity
-app.get("/api/identity", function(request, response, next) {
-  client.getIdentity(ACCESS_TOKEN, function(error, identityResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    prettyPrintResponse(identityResponse);
-    response.json({ identity: identityResponse.accounts });
-  });
-});
-
-// Retrieve real-time Balances for each of an Item's accounts
-// https://plaid.com/docs/#balance
-app.get("/api/balance", function(request, response, next) {
-  client.getBalance(ACCESS_TOKEN, function(error, balanceResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    prettyPrintResponse(balanceResponse);
-    response.json(balanceResponse);
-  });
-});
-
-// Retrieve information about an Item
-// https://plaid.com/docs/#retrieve-item
-app.get("/api/item", function(request, response, next) {
-  // Pull the Item - this includes information about available products,
-  // billed products, webhook information, and more.
-  client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    // Also pull information about the institution
-    client.getInstitutionById(itemResponse.item.institution_id, function(
-      err,
-      instRes
-    ) {
-      if (err != null) {
-        var msg = "Unable to pull institution information from the Plaid API.";
-        console.log(msg + "\n" + JSON.stringify(error));
-        return response.json({
-          error: msg
-        });
-      } else {
-        prettyPrintResponse(itemResponse);
-        response.json({
-          item: itemResponse.item,
-          institution: instRes.institution
-        });
-      }
-    });
-  });
 });
 
 var server = app.listen(APP_PORT, function() {
