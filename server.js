@@ -5,10 +5,11 @@ var util = require("util");
 var envvar = require("envvar");
 var express = require("express");
 var bodyParser = require("body-parser");
-var moment = require("moment");
-const PlaidClient = require('./plaidClient');
+
+const PlaidClient = require("./plaidClient");
 
 var APP_PORT = envvar.number("APP_PORT", 8000);
+
 var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 var PLAID_SECRET = process.env.PLAID_SECRET;
 var PLAID_ENV = process.env.PLAID_ENV;
@@ -41,17 +42,6 @@ var PAYMENT_ID = null;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
-
-/*
-var client = new plaid.Client({
-  clientID: PLAID_CLIENT_ID,
-  secret: PLAID_SECRET,
-  env: plaid.environments[PLAID_ENV],
-  options: {
-    version: "2019-05-29"
-  }
-});
-*/
 
 const client = new PlaidClient();
 
@@ -89,6 +79,7 @@ app.post("/api/info", function(request, response, next) {
   });
 });
 
+// create a link token
 app.post("/api/create_link_token", async function(request, response, next) {
   const configs = {
     user: {
@@ -142,20 +133,24 @@ app.post("/api/set_access_token", async function(request, response, next) {
   }
 });
 
-// Retrieve an Item's accounts
-// https://plaid.com/docs/#accounts
+// Return an account for an item
 app.get("/api/accounts", async function(request, response, next) {
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
 
   let accountsResponses = [];
 
+  try {
   for (let i = 0; i < access_tokens.length; i++) {
     let access_token = access_tokens[i];
     let accounts = await client.getAccounts(access_token);
-    let institution = await getInstitution(access_token);
+    let institution = await client.getInstitution(access_token);
     let accountsData = { accounts, institution: institution.institution.name };
     accountsResponses.push(accountsData);
+  }
+  } catch (error) {
+    console.log(error);
+    response.json({error})
   }
 
   console.log("accountsResponses: ", accountsResponses);
@@ -163,51 +158,20 @@ app.get("/api/accounts", async function(request, response, next) {
   response.json(accountsResponses);
 });
 
-async function getAccounts(access_token) {
-  let accountsResponse = await client.getAccounts(access_token);
-  return accountsResponse;
-}
-
-async function getInstitution(access_token) {
-  let item = await client.getItem(access_token);
-  let institution = await client.getInstitutionById(item.item.institution_id);
-  return institution;
-}
-
-async function getTransactions(access_token) {
-  var startDate = moment()
-    .subtract(7, "days")
-    .format("YYYY-MM-DD");
-  var endDate = moment().format("YYYY-MM-DD");
-
-  let transactions;
-
-  try {
-    transactions = await client.getTransactions(
-      access_token,
-      startDate,
-      endDate,
-      {
-        count: 250,
-        offset: 0
-      }
-    );
-  } catch (e) {
-    console.log(e);
-  }
-
-  return transactions;
-}
-
 app.get("/api/transactions", async function(request, response, next) {
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
   let transactionsList = [];
 
-  for (let i = 0; i < access_tokens.length; i++) {
-    let access_token = access_tokens[i];
-    let transactions = await getTransactions(access_token);
-    transactionsList.push(transactions);
+  try {
+    for (let i = 0; i < access_tokens.length; i++) {
+      let access_token = access_tokens[i];
+      let transactions = await client.getTransactions(access_token);
+      transactionsList.push(transactions);
+    }
+  } catch (error) {
+    console.log(error);
+    response.json({error});
   }
 
   response.json(transactionsList);
