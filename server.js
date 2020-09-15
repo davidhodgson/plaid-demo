@@ -68,6 +68,10 @@ app.get("/summary", function(request, response, next) {
   response.sendFile("./views/summary.html", { root: __dirname });
 });
 
+app.get("/transactions", function(request, response, next) {
+  response.sendFile("./views/transactions.html", { root: __dirname });
+});
+
 // This is an endpoint defined for the OAuth flow to redirect to.
 app.get("/oauth-response.html", function(request, response, next) {
   response.sendFile("./views/oauth-response.html", { root: __dirname });
@@ -255,48 +259,44 @@ async function getInstitution(access_token) {
   return institution;
 }
 
-// Retrieve an Item's accounts
-// https://plaid.com/docs/#accounts
-/*
-app.get('/api/accounts', function(request, response, next) {
+app.get("/api/transactions", function(request, response, next) {
   
   let accessTokens = JSON.parse(request.query.data);
   console.log("accessTokens: ", accessTokens);
   let access_tokens = accessTokens.access_tokens;
   console.log("access_tokens: ", access_tokens);
+  let accountsResponses = [];
   
   
-  
-  client.getAccounts(ACCESS_TOKEN, function(error, accountsResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error,
-      });
+  // Pull transactions for the Item for the last 30 days
+  var startDate = moment()
+    .subtract(30, "days")
+    .format("YYYY-MM-DD");
+  var endDate = moment().format("YYYY-MM-DD");
+  client.getTransactions(
+    ACCESS_TOKEN,
+    startDate,
+    endDate,
+    {
+      count: 250,
+      offset: 0
+    },
+    function(error, transactionsResponse) {
+      if (error != null) {
+        prettyPrintResponse(error);
+        return response.json({
+          error: error
+        });
+      } else {
+        prettyPrintResponse(transactionsResponse);
+        response.json(transactionsResponse);
+      }
     }
-    prettyPrintResponse(accountsResponse);
-    response.json(accountsResponse);
-  });
-});
-*/
-
-// Retrieve ACH or ETF Auth data for an Item's accounts
-// https://plaid.com/docs/#auth
-app.get("/api/auth", function(request, response, next) {
-  client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error
-      });
-    }
-    prettyPrintResponse(authResponse);
-    response.json(authResponse);
-  });
+  );
 });
 
-// Retrieve Transactions for an Item
-// https://plaid.com/docs/#transactions
+
+/*
 app.get("/api/transactions", function(request, response, next) {
   // Pull transactions for the Item for the last 30 days
   var startDate = moment()
@@ -324,6 +324,7 @@ app.get("/api/transactions", function(request, response, next) {
     }
   );
 });
+*/
 
 // Retrieve Identity for an Item
 // https://plaid.com/docs/#identity

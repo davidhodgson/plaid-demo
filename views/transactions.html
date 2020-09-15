@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Recent transactions</title>
+    <link rel="stylesheet" href="https://threads.plaid.com/threads.css" />
+
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <main class="main">
+      <h1 class="everpresent-content__heading">Recent transactions</h1>
+      <div class="item-data-row__response">
+        <table>
+          <tbody id="get-transactions-data"></tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+  <script>
+    let access_tokens = JSON.parse(localStorage.getItem("access_tokens"));
+
+    $.get({
+      url: "/api/accounts",
+      data: { data: JSON.stringify({ access_tokens }) },
+      success: function(data) {
+        console.log("accounts data: ", data);
+
+        $("#get-transactions-data").slideUp(function() {
+          console.log("error: ", data.error);
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
+          var html =
+            `<tr>
+                <td><strong>Institution</strong></td>
+                <td><strong>Name</strong></td>
+                <td><strong>Type</strong></td>
+                <td><strong>Balance</strong></td>
+            </tr>`;
+
+          for (let i = 0; i < data.length; i++) {
+            let institution = data[i].institution;
+
+            data[i].accounts.accounts.forEach(function(account, idx) {
+              html += "<tr>";
+              html += "<td>" + institution + "</td>";
+              html += "<td>" + account.name + "</td>";
+              html += "<td>" + account.subtype + "</td>";
+              html +=
+                "<td>$" +
+                (account.balances.available != null
+                  ? account.balances.available
+                  : account.balances.current) +
+                "</td>";
+              html += "</tr>";
+            });
+          }
+
+          $(this)
+            .html(html)
+            .slideDown();
+        });
+      }
+    });
+  </script>
+</html>
