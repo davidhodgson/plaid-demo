@@ -185,3 +185,5 @@ var server = app.listen(APP_PORT, function() {
 var prettyPrintResponse = response => {
   console.log(util.inspect(response, { colors: true, depth: 4 }));
 };
+
+module.exports = app;
