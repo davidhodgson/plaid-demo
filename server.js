@@ -7,13 +7,12 @@ var express = require("express");
 var bodyParser = require("body-parser");
 
 const PlaidClient = require("./plaidClient");
-
-var APP_PORT = envvar.number("APP_PORT", 8000);
+const { MockPlaidClient, PlaidClientWrapper, RealPlaidClient } = require("./plaidClient");
 
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-var PLAID_PRODUCTS = process.env.PLAID_PRODUCTS.split(",");
+var PLAID_PRODUCTS = "transactions";
 
 // PLAID_PRODUCTS is a comma-separated list of countries for which users
 // will be able to select institutions from.
@@ -40,7 +39,17 @@ var PAYMENT_ID = null;
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
 
-const client = new PlaidClient();
+let client;
+let APP_PORT;
+if (process.env.TESTING) {
+  let mockPlaidClient = new MockPlaidClient();
+  client = new PlaidClientWrapper(mockPlaidClient);
+  APP_PORT = 8001;
+} else {
+  let realPlaidClient = new RealPlaidClient();
+  client = new PlaidClientWrapper(realPlaidClient);
+  APP_PORT = 8000;
+}
 
 var app = express();
 app.use(express.static("public"));
@@ -160,9 +169,18 @@ app.get("/api/accounts", async function(request, response, next) {
 
 // Returns a list of transactions, given a list of access_tokens
 app.get("/api/transactions", async function(request, response, next) {
+  console.log("query: ", request.query.data);
   let accessTokens = JSON.parse(request.query.data);
+  console.log("accessTokens: ", accessTokens);
   let access_tokens = accessTokens.access_tokens;
+
+  console.log('access_tokens', access_tokens);
+
   let transactionsList = [];
+
+  if (!access_tokens) {
+    response.json({error: "no access_tokens"});
+  }
 
   try {
     for (let i = 0; i < access_tokens.length; i++) {

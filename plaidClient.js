@@ -5,8 +5,65 @@ var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 var PLAID_SECRET = process.env.PLAID_SECRET;
 var PLAID_ENV = process.env.PLAID_ENV;
 
-class PlaidClient {
-  constructor() {
+class RealPlaidClient {
+  createLinkToken(configs) {
+    return 'link-token';
+  }
+
+  exchangePublicToken(public_token) {
+    return 'access-token';
+  }
+
+  getAccounts(access_token) {
+    return 'list-of-accounts';
+  }
+
+  async getInstitution(access_token) {
+    return 'institution-name';
+  }
+
+  async getTransactions() {
+
+  }
+}
+
+class MockPlaidClient {
+  createLinkToken(configs) {
+    return 'link-token';
+  }
+
+  exchangePublicToken(public_token) {
+    return {access_token: 'access-token', item_id: 'item-id'};
+  }
+
+  getAccounts(access_token) {
+    return 'list-of-accounts';
+  }
+
+  async getItem(access_token) {
+    return {
+      item: {
+        institution_id: 'institution-id'
+      }
+    }
+  }
+
+  async getInstitution(access_token) {
+    return 'institution-name';
+  }
+
+  async getInstitutionById(id) {
+    return 'institution-name';
+  }
+
+  async getTransactions(access_token) {
+    return 'transactions-list';
+  }
+}
+
+class PlaidClientWrapper {
+  constructor(client) {
+    /*
     this.client = new plaid.Client({
       clientID: PLAID_CLIENT_ID,
       secret: PLAID_SECRET,
@@ -15,6 +72,9 @@ class PlaidClient {
         version: "2019-05-29"
       }
     });
+    */
+
+    this.client = client;
   }
 
   createLinkToken(configs) {
@@ -64,4 +124,4 @@ class PlaidClient {
   }
 }
 
-module.exports = PlaidClient;
+module.exports = { PlaidClientWrapper, RealPlaidClient, MockPlaidClient };
