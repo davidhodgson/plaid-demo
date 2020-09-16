@@ -7,7 +7,7 @@ var bodyParser = require("body-parser");
 const { MockPlaidClient, PlaidClientWrapper, RealPlaidClient } = require("./plaidClient");
 
 var PLAID_PRODUCTS = ["transactions"];
-var PLAID_COUNTRY_CODES = "US";
+var PLAID_COUNTRY_CODES = ["US"];
 
 // Parameters used for the OAuth redirect Link flow.
 //
@@ -57,8 +57,8 @@ app.get("/oauth-response.html", function(request, response, next) {
 
 app.post("/api/info", function(request, response, next) {
   response.json({
-    item_id: ITEM_ID,
-    access_token: ACCESS_TOKEN,
+    item_id: "item_id",
+    access_token: "access_token",
     products: PLAID_PRODUCTS
   });
 });

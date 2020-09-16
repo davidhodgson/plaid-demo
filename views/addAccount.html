@@ -21,12 +21,8 @@
         <div class="grid__column grid__column--is-twelve-columns">
           <div id="banner" class="everpresent-content">
             <h1 class="everpresent-content__heading">Add account</h1>
-            <p id="intro" class="everpresent-content__subheading">
-              An example application that outlines an end-to-end integration
-              with Plaid
-            </p>
             <p id="steps" class="everpresent-content__subheading">
-              Success! You just created an Item by linking your account.
+              Succesfully linked account!
             </p>
           </div>
 
@@ -96,15 +92,21 @@
       }
 
       $("#link-btn").on("click", function(e) {
-        console.log("link-btn called");
         if (handler != null) {
           handler.open();
         }
       });
 
+      /*
       $.post("/api/info", {}, function(result) {
         render_page(jQuery, result);
       });
+      */
+      
+   $(document ).ready(function() {
+        render_page(jQuery);
+    });
+ 
     </script>
   </body>
 </html>
