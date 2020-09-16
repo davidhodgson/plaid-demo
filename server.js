@@ -46,6 +46,7 @@ if (process.env.TESTING) {
   client = new PlaidClientWrapper(mockPlaidClient);
   APP_PORT = 8001;
 } else {
+  console.log("creating real plaid client");
   let realPlaidClient = new RealPlaidClient();
   client = new PlaidClientWrapper(realPlaidClient);
   APP_PORT = 8000;
