@@ -26,12 +26,16 @@ class RealPlaidClient {
     return this.client.exchangePublicToken(public_token);
   }
 
-  getAccounts(access_token) {
-    return 'list-of-accounts';
+  async getAccounts(access_token) {
+    return await this.client.getAccounts(access_token);
   }
 
   async getInstitution(access_token) {
-    return 'institution-name';
+    let item = await this.client.getItem(access_token);
+    let institution = await this.client.getInstitutionById(
+      item.item.institution_id
+    );
+    return institution;
   }
 
   async getTransactions() {
@@ -102,11 +106,7 @@ class PlaidClientWrapper {
   }
 
   async getInstitution(access_token) {
-    let item = await this.client.getItem(access_token);
-    let institution = await this.client.getInstitutionById(
-      item.item.institution_id
-    );
-    return institution;
+    return this.client.getInstitution(access_token);
   }
   
   async getTransactions(access_token) {

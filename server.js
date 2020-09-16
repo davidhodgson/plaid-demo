@@ -147,12 +147,14 @@ app.get("/api/accounts", async function(request, response, next) {
   
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
+  console.log("access_tokens: ", accessTokens);
 
   let accountsList = [];
 
   try {
     for (let i = 0; i < access_tokens.length; i++) {
       let access_token = access_tokens[i];
+      console.log("access_token: ", access_token);
       let accounts = await client.getAccounts(access_token);
       let institution = await client.getInstitution(access_token);
       let accountsData = {
