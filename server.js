@@ -55,14 +55,6 @@ app.get("/oauth-response.html", function(request, response, next) {
   response.sendFile("./views/oauth-response.html", { root: __dirname });
 });
 
-app.post("/api/info", function(request, response, next) {
-  response.json({
-    item_id: "item_id",
-    access_token: "access_token",
-    products: PLAID_PRODUCTS
-  });
-});
-
 // create a link token
 app.post("/api/create_link_token", async function(request, response, next) {
   const configs = {
@@ -155,7 +147,6 @@ app.get("/api/transactions", async function(request, response, next) {
     for (let i = 0; i < access_tokens.length; i++) {
       let access_token = access_tokens[i];
       let transactions = await client.getTransactions(access_token);
-      console.log(transactions);
       transactionsList.push(transactions);
     }
   } catch (error) {

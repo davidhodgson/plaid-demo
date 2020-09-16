@@ -11,9 +11,9 @@
   <body>
     <div class="topnav">
       <div class="topnav-right">
-        <a href = "/">Add account </a>
-        <a href = "/summary">Account summary</a>
-        <a href = "/transactions">Recent transactions</a>
+        <a href="/">Add account </a>
+        <a href="/summary">Account summary</a>
+        <a href="/transactions">Recent transactions</a>
       </div>
     </div>
     <main class="main">
@@ -22,13 +22,14 @@
           <div id="banner" class="everpresent-content">
             <h1 class="everpresent-content__heading">Add account</h1>
             <p id="steps" class="everpresent-content__subheading">
-              Succesfully linked account!
+              Successfully linked account! Please refresh the page to link another account.
             </p>
           </div>
 
           <div id="container" class="initial-view">
             <p class="initial-view__description">
-              Click the button below to add an account. The username is user_good, and the password is pass_good for sandbox accounts.
+              Click the button below to add an account. The username is
+              user_good, and the password is pass_good for sandbox accounts.
             </p>
 
             <button id="link-btn" class="button button--is-primary">
@@ -45,7 +46,6 @@
       var handler;
       function render_page($, page_info) {
         handler = null;
-        console.log("rendering page");
 
         $.post("/api/create_link_token", {}, function(data) {
           console.log("creating link token");
@@ -66,16 +66,21 @@
                 },
                 function(data) {
                   let access_tokens;
-                  
-                  if (localStorage.getItem('access_tokens')) {
-                    access_tokens = JSON.parse(localStorage.getItem('access_tokens'));
+
+                  if (localStorage.getItem("access_tokens")) {
+                    access_tokens = JSON.parse(
+                      localStorage.getItem("access_tokens")
+                    );
                   } else {
                     access_tokens = [];
                   }
-                  
+
                   access_tokens.push(data.access_token);
-                  localStorage.setItem("access_tokens", JSON.stringify(access_tokens));
-                  
+                  localStorage.setItem(
+                    "access_tokens",
+                    JSON.stringify(access_tokens)
+                  );
+
                   $("#container").fadeOut("fast", function() {
                     $("#item_id").text(data.item_id);
                     $("#access_token").text(data.access_token);
@@ -97,16 +102,9 @@
         }
       });
 
-      /*
-      $.post("/api/info", {}, function(result) {
-        render_page(jQuery, result);
-      });
-      */
-      
-   $(document ).ready(function() {
+      $(document).ready(function() {
         render_page(jQuery);
-    });
- 
+      });
     </script>
   </body>
 </html>
