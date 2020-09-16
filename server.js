@@ -1,7 +1,5 @@
 "use strict";
 
-var util = require("util");
-
 var envvar = require("envvar");
 var express = require("express");
 var bodyParser = require("body-parser");
@@ -19,10 +17,6 @@ var PLAID_COUNTRY_CODES = "US";
 // this redirect URI for your client ID through the Plaid developer dashboard
 // at https://dashboard.plaid.com/team/api.
 var PLAID_REDIRECT_URI = envvar.string("PLAID_REDIRECT_URI", "");
-
-// Initialize the Plaid client
-// Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
-
 let client;
 let APP_PORT;
 if (process.env.TESTING) {

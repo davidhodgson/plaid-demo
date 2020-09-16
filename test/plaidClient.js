@@ -23,12 +23,13 @@ describe("PlaidClient", function() {
   
   it("should get an institution, given an access token", async function() {
     let institution = await plaidClient.getInstitution("access_token");
-    expect(institution).to.eql("institution-name");
+    let expected = { institution: { name: "institution-name"}};
+
+    expect(institution).to.eql(expected);
   });
   
   it("should get recent transaction data, given an access token", async function() {
     let transactions_list = await plaidClient.getTransactions("access_token");
-    console.log("returned: ", transactions_list);
     expect(transactions_list).to.eql("transactions-list");
   });
   
