@@ -6,7 +6,6 @@ var PLAID_SECRET = process.env.PLAID_SECRET;
 var PLAID_ENV = process.env.PLAID_ENV;
 
 class RealPlaidClient {
-  
   constructor() {
     this.client = new plaid.Client({
       clientID: PLAID_CLIENT_ID,
@@ -17,7 +16,7 @@ class RealPlaidClient {
       }
     });
   }
-  
+
   createLinkToken(configs) {
     return this.client.createLinkToken(configs);
   }
@@ -38,42 +37,63 @@ class RealPlaidClient {
     return institution;
   }
 
-  async getTransactions() {
+  async getTransactions(access_token) {
+    var startDate = moment()
+      .subtract(7, "days")
+      .format("YYYY-MM-DD");
+    var endDate = moment().format("YYYY-MM-DD");
 
+    let transactions;
+
+    try {
+      transactions = await this.client.getTransactions(
+        access_token,
+        startDate,
+        endDate,
+        {
+          count: 250,
+          offset: 0
+        }
+      );
+      return transactions;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }
 
 class MockPlaidClient {
   createLinkToken(configs) {
-    return 'link-token';
+    return "link-token";
   }
 
   exchangePublicToken(public_token) {
-    return {access_token: 'access-token', item_id: 'item-id'};
+    return { access_token: "access-token", item_id: "item-id" };
   }
 
   getAccounts(access_token) {
-    return 'list-of-accounts';
+    return "list-of-accounts";
   }
 
   async getItem(access_token) {
     return {
       item: {
-        institution_id: 'institution-id'
+        institution_id: "institution-id"
       }
-    }
+    };
   }
 
   async getInstitution(access_token) {
-    return 'institution-name';
+    return "institution-name";
   }
 
   async getInstitutionById(id) {
-    return 'institution-name';
+    return "institution-name";
   }
 
   async getTransactions(access_token) {
-    return 'transactions-list';
+    return "transactions-list";
   }
 }
 
@@ -108,31 +128,9 @@ class PlaidClientWrapper {
   async getInstitution(access_token) {
     return this.client.getInstitution(access_token);
   }
-  
+
   async getTransactions(access_token) {
-    var startDate = moment()
-    .subtract(7, "days")
-    .format("YYYY-MM-DD");
-  var endDate = moment().format("YYYY-MM-DD");
-
-  let transactions;
-
-  try {
-    transactions = await this.client.getTransactions(
-      access_token,
-      startDate,
-      endDate,
-      {
-        count: 250,
-        offset: 0
-      }
-    );
-  } catch (error) {
-    console.log(error);
-    throw(error);
-  }
-
-  return transactions;
+    return await this.client.getTransactions(access_token);
   }
 }
 

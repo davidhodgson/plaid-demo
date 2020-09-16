@@ -1,7 +1,7 @@
 const { PlaidClientWrapper, MockPlaidClient } = require("../plaidClient");
 var expect = require('chai').expect;
 
-describe.only("PlaidClient", function() {
+describe("PlaidClient", function() {
   
   const mockPlaidClient = new MockPlaidClient();
   const plaidClient = new PlaidClientWrapper(mockPlaidClient);

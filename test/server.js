@@ -14,8 +14,7 @@ describe.only("API tests", function() {
   });
 
   it.only("should test /api/accounts", async function() {
-    let tokens = ['token1', 'token2'];
-    const resp = await request(app).get('/api/transactions').query({data: tokens});
+    const resp = await request(app).get('/api/accounts?data={"access_tokens":["access-sandbox-token1","access-sandbox-token2"]}');
     expect(resp.body).to.eql('test');
   });
 

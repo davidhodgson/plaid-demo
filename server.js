@@ -192,6 +192,7 @@ app.get("/api/transactions", async function(request, response, next) {
     for (let i = 0; i < access_tokens.length; i++) {
       let access_token = access_tokens[i];
       let transactions = await client.getTransactions(access_token);
+      console.log(transactions);
       transactionsList.push(transactions);
     }
   } catch (error) {
