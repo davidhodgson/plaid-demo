@@ -142,6 +142,9 @@ app.post("/api/set_access_token", async function(request, response, next) {
 
 // Returns a list of accounts, given a list of access_tokens
 app.get("/api/accounts", async function(request, response, next) {
+  
+  console.log("request.query: ", request.query);
+  
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
 

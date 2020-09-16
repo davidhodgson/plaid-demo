@@ -28,10 +28,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script>
     let access_tokens = JSON.parse(localStorage.getItem("access_tokens"));
-
+    console.log("access_tokens: ", access_tokens);
+    let query = access_tokens.join(access_tokens);
+    console.log(query);
+    
     $.get({
       url: "/api/accounts",
-      data: { data: JSON.stringify({ access_tokens }) },
+      data: query,
       success: function(data) {
         console.log("accounts data: ", data);
 

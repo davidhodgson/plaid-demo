@@ -19,12 +19,11 @@ class RealPlaidClient {
   }
   
   createLinkToken(configs) {
-    console.log("configs: ", configs);
     return this.client.createLinkToken(configs);
   }
 
   exchangePublicToken(public_token) {
-    return 'access-token';
+    return this.client.exchangePublicToken(public_token);
   }
 
   getAccounts(access_token) {
