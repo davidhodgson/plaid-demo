@@ -6,17 +6,10 @@ var envvar = require("envvar");
 var express = require("express");
 var bodyParser = require("body-parser");
 
-const PlaidClient = require("./plaidClient");
 const { MockPlaidClient, PlaidClientWrapper, RealPlaidClient } = require("./plaidClient");
 
-// PLAID_PRODUCTS is a comma-separated list of products to use when initializing
-// Link. Note that this list must contain 'assets' in order for the app to be
-// able to create and retrieve asset reports.
 var PLAID_PRODUCTS = ["transactions"];
-
-// PLAID_PRODUCTS is a comma-separated list of countries for which users
-// will be able to select institutions from.
-var PLAID_COUNTRY_CODES = "US".split(",");
+var PLAID_COUNTRY_CODES = "US";
 
 // Parameters used for the OAuth redirect Link flow.
 //
@@ -26,15 +19,6 @@ var PLAID_COUNTRY_CODES = "US".split(",");
 // this redirect URI for your client ID through the Plaid developer dashboard
 // at https://dashboard.plaid.com/team/api.
 var PLAID_REDIRECT_URI = envvar.string("PLAID_REDIRECT_URI", "");
-
-// We store the access_token in memory - in production, store it in a secure
-// persistent data store
-var ACCESS_TOKEN = null;
-var ITEM_ID = null;
-// The payment_id is only relevant for the UK Payment Initiation product.
-// We store the payment_id in memory - in production, store it in a secure
-// persistent data store
-var PAYMENT_ID = null;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
@@ -46,7 +30,6 @@ if (process.env.TESTING) {
   client = new PlaidClientWrapper(mockPlaidClient);
   APP_PORT = 8001;
 } else {
-  console.log("creating real plaid client");
   let realPlaidClient = new RealPlaidClient();
   client = new PlaidClientWrapper(realPlaidClient);
   APP_PORT = 8000;
@@ -121,15 +104,9 @@ app.post("/api/set_access_token", async function(request, response, next) {
   try {
     resp = await client.exchangePublicToken(request.body.public_token);
 
-    ACCESS_TOKEN = resp.access_token;
-    ITEM_ID = resp.item_id;
-    console.log(resp);
-    console.log("access token: ", ACCESS_TOKEN);
-    console.log("item id: ", ITEM_ID);
-
     response.json({
-      access_token: ACCESS_TOKEN,
-      item_id: ITEM_ID,
+      access_token: resp.access_token,
+      item_id: resp.item_id,
       error: null
     });
   } catch (error) {
@@ -143,24 +120,22 @@ app.post("/api/set_access_token", async function(request, response, next) {
 // Returns a list of accounts, given a list of access_tokens
 app.get("/api/accounts", async function(request, response, next) {
   
-  console.log("request.query: ", request.query);
-  
   let accessTokens = JSON.parse(request.query.data);
   let access_tokens = accessTokens.access_tokens;
-  console.log("access_tokens: ", accessTokens);
 
   let accountsList = [];
 
   try {
     for (let i = 0; i < access_tokens.length; i++) {
       let access_token = access_tokens[i];
-      console.log("access_token: ", access_token);
       let accounts = await client.getAccounts(access_token);
       let institution = await client.getInstitution(access_token);
+
       let accountsData = {
         accounts,
         institution: institution.institution.name
       };
+
       accountsList.push(accountsData);
     }
   } catch (error) {
@@ -168,19 +143,13 @@ app.get("/api/accounts", async function(request, response, next) {
     response.json({ error });
   }
 
-  console.log("accountsList: ", accountsList);
-
   response.json(accountsList);
 });
 
 // Returns a list of transactions, given a list of access_tokens
 app.get("/api/transactions", async function(request, response, next) {
-  console.log("query: ", request.query.data);
   let accessTokens = JSON.parse(request.query.data);
-  console.log("accessTokens: ", accessTokens);
   let access_tokens = accessTokens.access_tokens;
-
-  console.log('access_tokens', access_tokens);
 
   let transactionsList = [];
 
@@ -206,9 +175,5 @@ app.get("/api/transactions", async function(request, response, next) {
 var server = app.listen(APP_PORT, function() {
   console.log("Server listening on port " + APP_PORT);
 });
-
-var prettyPrintResponse = response => {
-  console.log(util.inspect(response, { colors: true, depth: 4 }));
-};
 
 module.exports = app;

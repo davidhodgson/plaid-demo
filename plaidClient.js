@@ -85,7 +85,7 @@ class MockPlaidClient {
   }
 
   async getInstitution(access_token) {
-    return "institution-name";
+    return {institution: {name: 'institution-name'}};
   }
 
   async getInstitutionById(id) {
@@ -99,17 +99,6 @@ class MockPlaidClient {
 
 class PlaidClientWrapper {
   constructor(client) {
-    /*
-    this.client = new plaid.Client({
-      clientID: PLAID_CLIENT_ID,
-      secret: PLAID_SECRET,
-      env: plaid.environments[PLAID_ENV],
-      options: {
-        version: "2019-05-29"
-      }
-    });
-    */
-
     this.client = client;
   }
 
